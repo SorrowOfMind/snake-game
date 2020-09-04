@@ -1,0 +1,10 @@
+.gamebox {
+    margin: 0 auto;
+    width: 600px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 25px 0;
+    background-color: #282D1E;
+}
