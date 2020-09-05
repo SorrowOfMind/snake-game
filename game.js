@@ -17,6 +17,7 @@ const definePos = (fields, box) => Math.floor(fields * 0.5) * box;
 let snake = [
     {x: definePos(numOfFields, SIZE), y: definePos(numOfFields, SIZE)}
 ];
+const head = snake[0];
 
 let apple = {x: random() * SIZE, y: random() * SIZE};
 
@@ -27,20 +28,32 @@ const controller = {
     down: false,
 
     checkKeys(e) {
-        let state = e.type === 'keydown' ? true : false;
+        let state = e.type === 'keydown';
         console.log(e.keyCode)
         switch(e.keyCode) {
             case 37:
                 controller.left = state;
+                controller.right = false;
+                controller.up = false;
+                controller.down = false;
                 break;
             case 38: 
                 controller.up = state;
+                controller.down = false;
+                controller.right = false;
+                controller.left = false;
                 break;
             case 39:
-                controller.right;
+                controller.right = state;
+                controller.left = false;
+                controller.up = false;
+                controller.down = false;
                 break;
             case 40:
-                controller.down;
+                controller.down = state;
+                controller.up = false;
+                controller.right = false;
+                controller.left = false;
                 break;
         }
     }
@@ -49,7 +62,16 @@ const controller = {
 
 const moveSnake = () => {
     if (controller.left) {
-
+        head.x -= SIZE;
+    }
+    if (controller.right) {
+        head.x += SIZE;
+    }
+    if (controller.up) {
+        head.y -= SIZE;
+    }
+    if (controller.down) {
+        head.y += SIZE;
     }
 }
 
@@ -67,14 +89,27 @@ const drawSnake = () => {
     }
 }
 
-const gameLoop = () => {
+const detectBorderCollision = () => {
+    if (head.x < 0) head.x = width - SIZE;
+    if (head.x - SIZE> width) head.x = 0;
+    if (head.y + SIZE < 0) head.y = height - SIZE;
+    if (head.y > height) head.y = 0;
+}
+
+const game = () => {
     ctx.fillStyle = '#68edcb';
     ctx.fillRect(0,0,width,height);
     drawSnake();
     drawApple();
+    moveSnake();
+    detectBorderCollision();
 
-    window.requestAnimationFrame(gameLoop);
+    // window.requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener('keydown', controller.checkKeys)
-window.requestAnimationFrame(gameLoop);
+window.addEventListener('keydown', controller.checkKeys);
+// window.requestAnimationFrame(gameLoop);
+
+let gameLoop = setInterval(game, 100);
+
+
