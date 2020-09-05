@@ -30,55 +30,39 @@ const controller = {
 
     checkKeys(e) {
         let state = e.type === 'keydown';
-        switch(e.keyCode) {
-            case 37:
-                controller.left = state;
-                controller.right = false;
-                controller.up = false;
-                controller.down = false;
-                break;
-            case 38: 
-                controller.up = state;
-                controller.down = false;
-                controller.right = false;
-                controller.left = false;
-                break;
-            case 39:
-                controller.right = state;
-                controller.left = false;
-                controller.up = false;
-                controller.down = false;
-                break;
-            case 40:
-                controller.down = state;
-                controller.up = false;
-                controller.right = false;
-                controller.left = false;
-                break;
+        let key = e.keyCode;
+        if (key === 37 && !controller.right) {
+            controller.left = state;
+            controller.up = false;
+            controller.down = false;
+        }
+        if (key === 38 && !controller.down) {
+            controller.up = state;;
+            controller.right = false;
+            controller.left = false;
+        }
+        if (key === 39 && !controller.left) {
+            controller.right = state;
+            controller.up = false;
+            controller.down = false;
+        }
+        if (key === 40 && !controller.up) {
+            controller.down = state;
+            controller.right = false;
+            controller.left = false;
         }
     }
    
 }
 
-const moveSnake = () => {
-    if (controller.left) {
-        head.x -= SIZE;
-    }
-    if (controller.right) {
-        head.x += SIZE;
-    }
-    if (controller.up) {
-        head.y -= SIZE;
-    }
-    if (controller.down) {
-        head.y += SIZE;
-    }
+const moveSnake = ({left, right, up, down}) => {
+    if (left)  head.x -= SIZE;
+    if (right)  head.x += SIZE;
+    if (up) head.y -= SIZE;
+    if (down) head.y += SIZE;
 }
 
-const drawApple = () => {
-    ctx.drawImage(appleImg, apple.x, apple.y);
-}
-
+const drawApple = () => ctx.drawImage(appleImg, apple.x, apple.y);
 
 const drawSnake = () => {
     let i = 0;
@@ -93,36 +77,43 @@ const detectBorderCollision = () => {
     if (head.x < 0) head.x = width - SIZE;
     if (head.x + SIZE > width) head.x = 0;
     if (head.y < 0) head.y = height - SIZE;
-    if (head.y + SIZE> height) head.y = 0;
+    if (head.y + SIZE > height) head.y = 0;
+}
+
+const detectSelfCollision = (head, arr) => {
+    if (arr.length >= 3) {
+        for (let i = 2; i < arr.length; i++) {
+            if (head.x === arr[i].x && head.y === arr[i].y) gameOver();
+        }
+    }
+    else return ;
 }
 
 const eatApple = () => {
     if (head.x === apple.x && head.y === apple.y) {
-        console.log('boom')
         score++;
         scoreDisplay.textContent = score;
         apple = {x: random() * SIZE, y: random() * SIZE};
         console.log(apple);
-    } else {
-        snake.pop();
-    }
+    } else snake.pop();
 
     let newHead = {x: head.x, y: head.y}
     snake.unshift(newHead);
 }
+
+const gameOver = () => clearInterval(gameLoop);
 
 const game = () => {
     ctx.fillStyle = '#68edcb';
     ctx.fillRect(0,0,width,height);
     drawSnake();
     drawApple();
-    moveSnake();
+    moveSnake(controller);
     detectBorderCollision();
     eatApple();
+    detectSelfCollision(head, snake);
 }
 
 window.addEventListener('keydown', controller.checkKeys);
 
 let gameLoop = setInterval(game, 90);
-
-
