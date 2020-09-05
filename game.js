@@ -5,12 +5,13 @@ const SIZE = 32;
 const width = ctx.canvas.width;
 const height = ctx.canvas.height;
 const numOfFields = width / SIZE;
+const scoreDisplay = document.querySelector(".score");
 let score = 0;
 
 const appleImg = new Image();
 appleImg.src = "./assets/apple.png";
 
-const random = () => Math.floor(Math.random() * numOfFields + 1);
+const random = () => Math.floor(Math.random() * numOfFields);
 
 const definePos = (fields, box) => Math.floor(fields * 0.5) * box;
 
@@ -29,7 +30,6 @@ const controller = {
 
     checkKeys(e) {
         let state = e.type === 'keydown';
-        console.log(e.keyCode)
         switch(e.keyCode) {
             case 37:
                 controller.left = state;
@@ -91,9 +91,24 @@ const drawSnake = () => {
 
 const detectBorderCollision = () => {
     if (head.x < 0) head.x = width - SIZE;
-    if (head.x - SIZE> width) head.x = 0;
-    if (head.y + SIZE < 0) head.y = height - SIZE;
-    if (head.y > height) head.y = 0;
+    if (head.x + SIZE > width) head.x = 0;
+    if (head.y < 0) head.y = height - SIZE;
+    if (head.y + SIZE> height) head.y = 0;
+}
+
+const eatApple = () => {
+    if (head.x === apple.x && head.y === apple.y) {
+        console.log('boom')
+        score++;
+        scoreDisplay.textContent = score;
+        apple = {x: random() * SIZE, y: random() * SIZE};
+        console.log(apple);
+    } else {
+        snake.pop();
+    }
+
+    let newHead = {x: head.x, y: head.y}
+    snake.unshift(newHead);
 }
 
 const game = () => {
@@ -103,13 +118,11 @@ const game = () => {
     drawApple();
     moveSnake();
     detectBorderCollision();
-
-    // window.requestAnimationFrame(gameLoop);
+    eatApple();
 }
 
 window.addEventListener('keydown', controller.checkKeys);
-// window.requestAnimationFrame(gameLoop);
 
-let gameLoop = setInterval(game, 100);
+let gameLoop = setInterval(game, 90);
 
 
